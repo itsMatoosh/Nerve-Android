@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="title_activity_login">Zaloguj się</string>
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Hasło (opcjonalne)</string>
+    <string name="action_sign_in">Zaloguj się lub zarejestruj</string>
+    <string name="action_sign_in_short">Zaloguj się</string>
+    <string name="error_invalid_email">Podany adres email jest niepoprawny</string>
+    <string name="error_invalid_password">Użyte hasło jest za krótkie</string>
+    <string name="error_incorrect_password">Użyte hasło jest nieprawidłowe</string>
+    <string name="error_field_required">To pole jest wymagane</string>
+    <string name="permission_rationale">Dostęp do kontaktów jest niezbędny by znaleźć email[...]</string>
+    <string name="status_undernet_setup">Instalacja UnderNetu...</string>
+    <string name="status_undernet_connecting">Łączenie z UnderNetem...</string>
+    <string name="tab_live_map">Na Żywo</string>
+    <string name="tab_trending">Gorące</string>
+    <string name="tab_friends">Znajomi</string>
+    <string name="hint_account_button">Zarządzaj kontem</string>
+</resources>
