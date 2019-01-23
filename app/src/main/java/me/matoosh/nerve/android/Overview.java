@@ -14,16 +14,19 @@ import androidx.viewpager.widget.ViewPager;
 import androidx.appcompat.app.AppCompatActivity;
 import me.matoosh.nerve.android.dummy.DummyContent;
 
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
 
-public class Overview extends AppCompatActivity implements CameraFragment.OnFragmentInteractionListener, NodesFragment.OnListFragmentInteractionListener {
+public class Overview extends AppCompatActivity implements CameraFragment.OnFragmentInteractionListener, NodesFragment.OnListFragmentInteractionListener, DashboardFragment.OnFragmentInteractionListener{
 
     /**
      * The {@link PagerAdapter} that will provide
@@ -211,6 +214,8 @@ public class Overview extends AppCompatActivity implements CameraFragment.OnFrag
                 return NodesFragment.newInstance(1);
             } else if(position == 1) {
                 return CameraFragment.newInstance("a","b");
+            } else if(position == 2) {
+                return DashboardFragment.newInstance("a", "b");
             }
             return PlaceholderFragment.newInstance(position + 1);
         }

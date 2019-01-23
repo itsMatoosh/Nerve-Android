@@ -30,7 +30,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="0"
-            android:text="TextView" />
+            android:text="@string/tab_friends"
+            android:textAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Title" />
 
     </androidx.appcompat.widget.Toolbar>
 
