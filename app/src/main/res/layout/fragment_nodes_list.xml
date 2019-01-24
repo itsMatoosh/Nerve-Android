@@ -5,16 +5,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@android:color/background_light"
     android:orientation="vertical"
     app:layoutManager="LinearLayoutManager"
     tools:context=".NodesFragment">
 
     <View
-        android:id="@+id/view2"
+        android:id="@+id/statusbar"
         android:layout_width="match_parent"
-        android:layout_height="25dp"
+        android:layout_height="24dp"
         android:layout_weight="0"
-        android:background="@color/colorPrimary" />
+        android:background="@color/colorPrimaryDark" />
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
@@ -23,7 +24,7 @@
         android:layout_weight="0"
         android:background="@color/colorPrimary"
         android:minHeight="?attr/actionBarSize"
-        android:theme="?attr/actionBarTheme" >
+        android:theme="?attr/actionBarTheme">
 
         <TextView
             android:id="@+id/textView"
@@ -42,7 +43,7 @@
         android:layout_height="match_parent"
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
-        tools:listitem="@layout/fragment_nodes" >
+        tools:listitem="@layout/fragment_nodes">
 
 
     </androidx.recyclerview.widget.RecyclerView>

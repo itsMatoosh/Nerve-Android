@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
 
-    tools:context=".Overview$PlaceholderFragment">
+    tools:context=".Nerve$PlaceholderFragment">
 
     <View
         android:id="@+id/view"

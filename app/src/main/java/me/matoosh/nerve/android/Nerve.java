@@ -1,7 +1,9 @@
 package me.matoosh.nerve.android;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
-import android.database.DataSetObserver;
+import android.graphics.Camera;
+import android.graphics.Outline;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -12,21 +14,24 @@ import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 import androidx.appcompat.app.AppCompatActivity;
+import me.everything.android.ui.overscroll.OverScrollDecoratorHelper;
 import me.matoosh.nerve.android.dummy.DummyContent;
 
-import android.os.VibrationEffect;
-import android.os.Vibrator;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
+import android.view.ViewOutlineProvider;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
 
-public class Overview extends AppCompatActivity implements CameraFragment.OnFragmentInteractionListener, NodesFragment.OnListFragmentInteractionListener, DashboardFragment.OnFragmentInteractionListener{
+/**
+ * The main activity, facilitates most of the user interaction.
+ */
+public class Nerve extends AppCompatActivity implements CameraFragment.OnFragmentInteractionListener, NodesFragment.OnListFragmentInteractionListener, DashboardFragment.OnFragmentInteractionListener, ChannelsFragment.OnFragmentInteractionListener, BlankFragment.OnFragmentInteractionListener {
 
     /**
      * The {@link PagerAdapter} that will provide
@@ -43,17 +48,29 @@ public class Overview extends AppCompatActivity implements CameraFragment.OnFrag
      */
     private ViewPager mViewPager;
 
+    /**
+     * The channels fragment.
+     */
+    private ChannelsFragment channelsFragment;
+    /**
+     * The camera fragment.
+     */
+    private CameraFragment cameraFragment;
+
+    //Pager page ids.
+    public final int FRIENDS_PAGE = 0;
+    public final int CAMERA_PAGE = 1;
+    public final int DASHBOARD_PAGE = 2;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_overview);
-
+        setContentView(R.layout.activity_nerve);
         //Set unlimited layout
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             Window w = getWindow();
             w.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         }
-        showSystemUI();
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
@@ -82,8 +99,19 @@ public class Overview extends AppCompatActivity implements CameraFragment.OnFrag
 
             }
         });
+        OverScrollDecoratorHelper.setUpOverScroll(mViewPager);
     }
 
+    @Override
+    protected void onResume() {
+        this.findViewById(R.id.channels_fragment).setVisibility(View.GONE);
+        mViewPager.setVisibility(View.VISIBLE);
+        mViewPager.setCurrentItem(CAMERA_PAGE, false);
+        channelsFragment = ((ChannelsFragment)getSupportFragmentManager().findFragmentById(R.id.channels_fragment));
+        cameraFragment = ((CameraFragment)getSupportFragmentManager().findFragmentById(R.id.camera_fragment));
+
+        super.onResume();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -116,7 +144,7 @@ public class Overview extends AppCompatActivity implements CameraFragment.OnFrag
         decorView.setSystemUiVisibility(
                 View.SYSTEM_UI_FLAG_IMMERSIVE
                 // Set the content to appear under the system bars so that the
-                // content doesn't resize when the system bars hide and show.
+                // content doesn't resize when the system bars onHide and show.
                 | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
@@ -129,24 +157,100 @@ public class Overview extends AppCompatActivity implements CameraFragment.OnFrag
      */
     private void showSystemUI() {
         View decorView = getWindow().getDecorView();
-        decorView.setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            decorView.setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+        } else {
+            decorView.setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+        }
     }
 
     //Fragment listeners.
+    @Override
+    public void onListFragmentInteraction(DummyContent.DummyItem item) {
+
+    }
+
+    @Override
+    public void onDownSwipeStart() {
+        System.out.println("START");
+    }
+
+    /**
+     * Called while the user is swiping down on the camera view.
+     * @param distanceX
+     * @param distanceY
+     * @param posX
+     * @param posY
+     */
+    @Override
+    public void onDownSwipeProgress(int distanceX, int distanceY, int posX, int posY) {
+        if(channelsFragment != null) {
+            channelsFragment.reveal(-distanceY, posX, posY);
+        }
+    }
+
+    /**
+     * Called when the user stops swiping down on the camera view.
+     */
+    @Override
+    public void onDownSwipeStop() {
+        System.out.println("STOP");
+        if(channelsFragment != null) {
+            if(channelsFragment.shouldRevealSnap()) {
+                channelsFragment.revealFull();
+            } else {
+                channelsFragment.revealHide();
+            }
+        }
+    }
+
+    /**
+     * Called when the channels section has been revealed.
+     */
+    @Override
+    public void onSectionRevealed() {
+        //Hiding this section.
+        mViewPager.setVisibility(View.GONE);
+        showSystemUI();
+    }
+
+    @Override
+    public void onSectionRevealing() {
+
+    }
+
+    /**
+     * Called when the channels section has been hidden.
+     */
+    @Override
+    public void onSectionHidden() {
+
+    }
+
+    @Override
+    public void onSectionHiding() {
+        //Making this section visible.
+        mViewPager.setVisibility(View.VISIBLE);
+        hideSystemUI();
+    }
+
+    @Override
+    public boolean onBlankFragmentTouchEvent(MotionEvent event) {
+        return cameraFragment.getView().dispatchTouchEvent(event);
+    }
 
     @Override
     public void onFragmentInteraction(Uri uri) {
 
     }
 
-    @Override
-    public void onListFragmentInteraction(DummyContent.DummyItem item) {
-
-    }
 
     /**
      * A placeholder fragment containing a simple view.
@@ -185,14 +289,6 @@ public class Overview extends AppCompatActivity implements CameraFragment.OnFrag
         @Override
         public void onAttach(Context context) {
             super.onAttach(context);
-            showSystemUi();
-        }
-        private void showSystemUi() {
-            View decorView = getActivity().getWindow().getDecorView();
-            decorView.setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
         }
     }
 
@@ -210,11 +306,11 @@ public class Overview extends AppCompatActivity implements CameraFragment.OnFrag
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             // Return a PlaceholderFragment (defined as a static inner class below).
-            if(position == 0) {
+            if(position == FRIENDS_PAGE) {
                 return NodesFragment.newInstance(1);
-            } else if(position == 1) {
-                return CameraFragment.newInstance("a","b");
-            } else if(position == 2) {
+            } else if(position == CAMERA_PAGE) {
+                return BlankFragment.newInstance();
+            } else if(position == DASHBOARD_PAGE) {
                 return DashboardFragment.newInstance("a", "b");
             }
             return PlaceholderFragment.newInstance(position + 1);

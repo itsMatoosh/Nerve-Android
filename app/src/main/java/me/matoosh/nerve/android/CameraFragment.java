@@ -15,6 +15,7 @@ import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 
+import com.otaliastudios.cameraview.CameraListener;
 import com.otaliastudios.cameraview.CameraView;
 import com.otaliastudios.cameraview.Gesture;
 import com.otaliastudios.cameraview.GestureAction;
@@ -23,12 +24,7 @@ import androidx.fragment.app.Fragment;
 
 
 /**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link CameraFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link CameraFragment#newInstance} factory method to
- * create an instance of this fragment.
+ * A camera view fragment.
  */
 public class CameraFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
@@ -41,13 +37,13 @@ public class CameraFragment extends Fragment {
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
-
+    private boolean isSwipingDown = false;
     private GestureDetector gestureDetector;
 
     /**
      * The camera preview.
      */
-    private CameraView cameraView;
+    public CameraView cameraView;
 
     public CameraFragment() {
         // Required empty public constructor
@@ -78,8 +74,6 @@ public class CameraFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
-
-        gestureDetector = new GestureDetector(getContext(), new GestureHandler());
     }
 
     @Override
@@ -92,20 +86,8 @@ public class CameraFragment extends Fragment {
         cameraView.mapGesture(Gesture.PINCH, GestureAction.ZOOM); // Pinch to zoom!
         cameraView.mapGesture(Gesture.TAP, GestureAction.FOCUS_WITH_MARKER); // Tap to focus!
         cameraView.mapGesture(Gesture.LONG_TAP, GestureAction.CAPTURE); // Long tap to shoot!
-        cameraView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                return gestureDetector.onTouchEvent(motionEvent);
-            }
-        });
-        return rootView;
-    }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
+        return rootView;
     }
 
     @Override
@@ -130,46 +112,8 @@ public class CameraFragment extends Fragment {
      * fragment to allow an interaction in this fragment to be communicated
      * to the activity and potentially other fragments contained in that
      * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
-    }
 
-    /**
-     * Detects and handles gestures.
-     */
-    public class GestureHandler extends android.view.GestureDetector.SimpleOnGestureListener {
-        @Override
-        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-            if(e2.getY() < e1.getY()) return false;
-
-            Vibrator v = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
-            if(v.hasVibrator()) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    //v.vibrate(VibrationEffect.createOneShot(100, 50));
-                } else {
-                    v.vibrate(100);
-                }
-            }
-
-            Animator anim = ViewAnimationUtils.createCircularReveal(cameraView, (int)e1.getX(), (int)e1.getY(), distanceY, cameraView.getHeight());
-            anim.setInterpolator(new AccelerateDecelerateInterpolator());
-            anim.start();
-            anim.
-
-            return super.onScroll(e1, e2, distanceX, distanceY);
-        }
-
-        @Override
-        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-
-
-            return super.onFling(e1, e2, velocityX, velocityY);
-        }
     }
 }

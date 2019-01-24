@@ -6,14 +6,27 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    android:screenOrientation="portrait"
-    tools:context=".Overview"
+    tools:context=".Nerve"
     android:theme="@style/Nerve">
+
+    <fragment
+        android:id="@+id/camera_fragment"
+        android:name="me.matoosh.nerve.android.CameraFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" >
+
+    </androidx.viewpager.widget.ViewPager>
+
+    <fragment
+        android:id="@+id/channels_fragment"
+        android:name="me.matoosh.nerve.android.ChannelsFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
