@@ -25,6 +25,7 @@ import android.view.ViewGroup;
 public class BlankFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
 
+    //Swipe variables.
     private boolean isSwipingDown = false;
     private GestureDetector gestureDetector;
 
@@ -46,7 +47,6 @@ public class BlankFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         gestureDetector = new GestureDetector(getContext(), new GestureHandler());
-
         super.onCreate(savedInstanceState);
     }
 
@@ -55,24 +55,19 @@ public class BlankFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_blank, container, false);
-        v.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                mListener.onBlankFragmentTouchEvent(motionEvent);
+        v.setOnTouchListener((view, motionEvent) -> {
+            mListener.onBlankFragmentTouchEvent(motionEvent);
 
-                if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                    if(isSwipingDown) {
-                        mListener.onDownSwipeStop();
-                        isSwipingDown = false;
-
-                        return false;
-                    }
-                } else {
-                    return gestureDetector.onTouchEvent(motionEvent);
+            if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                if(isSwipingDown) {
+                    mListener.onDownSwipeStop();
+                    isSwipingDown = false;
                 }
-
-                return false;
+            } else {
+                gestureDetector.onTouchEvent(motionEvent);
             }
+
+            return false;
         });
         return v;
     }

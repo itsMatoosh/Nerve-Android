@@ -96,7 +96,6 @@ public class Nerve extends AppCompatActivity implements CameraFragment.OnFragmen
 
             }
         });
-        OverScrollDecoratorHelper.setUpOverScroll(mViewPager);
     }
 
     @Override
@@ -176,7 +175,6 @@ public class Nerve extends AppCompatActivity implements CameraFragment.OnFragmen
 
     @Override
     public void onDownSwipeStart() {
-        System.out.println("START");
     }
 
     /**
@@ -198,12 +196,19 @@ public class Nerve extends AppCompatActivity implements CameraFragment.OnFragmen
      */
     @Override
     public void onDownSwipeStop() {
-        System.out.println("STOP");
         if(watchFragment != null) {
-            if(watchFragment.shouldRevealSnap()) {
-                watchFragment.revealFull();
+            if(watchFragment.isRevealed) {
+                if(!watchFragment.shouldRevealSnap()) {
+                    watchFragment.revealFull();
+                } else {
+                    watchFragment.revealHide();
+                }
             } else {
-                watchFragment.revealHide();
+                if(watchFragment.shouldRevealSnap()) {
+                    watchFragment.revealFull();
+                } else {
+                    watchFragment.revealHide();
+                }
             }
         }
     }
@@ -212,14 +217,14 @@ public class Nerve extends AppCompatActivity implements CameraFragment.OnFragmen
      * Called when the channels section has been revealed.
      */
     @Override
-    public void onSectionRevealed() {
+    public void onWatchSectionRevealed() {
         //Hiding this section.
         mViewPager.setVisibility(View.GONE);
         showSystemUI();
     }
 
     @Override
-    public void onSectionRevealing() {
+    public void onWatchSectionRevealing() {
 
     }
 
@@ -227,12 +232,12 @@ public class Nerve extends AppCompatActivity implements CameraFragment.OnFragmen
      * Called when the channels section has been hidden.
      */
     @Override
-    public void onSectionHidden() {
+    public void onWatchSectionHidden() {
 
     }
 
     @Override
-    public void onSectionHiding() {
+    public void onWatchSectionHiding() {
         //Making this section visible.
         mViewPager.setVisibility(View.VISIBLE);
         hideSystemUI();

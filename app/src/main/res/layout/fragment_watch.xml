@@ -5,9 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorAccentDark"
-    tools:context=".watch.WatchFragment">
-
-    <!-- TODO: Update blank fragment layout -->
+    tools:context=".watch.WatchFragment"
+    android:clickable="true">
 
     <View
         android:id="@+id/view3"
