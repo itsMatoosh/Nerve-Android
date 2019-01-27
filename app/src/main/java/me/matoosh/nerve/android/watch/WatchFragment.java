@@ -12,6 +12,7 @@ import me.matoosh.nerve.android.R;
 
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -36,7 +37,9 @@ public class WatchFragment extends Fragment {
     private boolean isSwipingDown = false;
     public boolean isRevealed = false;
     private GestureDetector gestureDetector;
+    private ValueAnimator valueAnimator;
 
+    public static final String TAG = "Watch View";
 
     public WatchFragment() {
         // Required empty public constructor
@@ -81,30 +84,6 @@ public class WatchFragment extends Fragment {
         mListener = null;
     }
 
-
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        void onWatchSectionRevealed();
-        void onWatchSectionRevealing();
-        void onWatchSectionHidden();
-        void onWatchSectionHiding();
-
-        //Swiping callbacks.
-        void onDownSwipeStart();
-        void onDownSwipeProgress(int distanceX, int distanceY, int posX, int posY);
-        void onDownSwipeStop();
-    }
-
     /**
      * Checks whether the reveal animation should snap to full view.
      * @return
@@ -118,54 +97,42 @@ public class WatchFragment extends Fragment {
             return 2*this.mOutlineProvider.getRadius() / getDiagonal() < 0.7f;
     }
 
-    public RevealOutlineProvider getOutlineProvider() {
-        return mOutlineProvider;
-    }
-
     /**
      * Animates the full reveal of the view.
      */
     public void revealFull() {
-        if(mListener != null) {
-            mListener.onWatchSectionRevealing();
-        }
-
-        ValueAnimator animator = ValueAnimator.ofInt((int)(Math.abs(getOutlineProvider().getRadius()) * 2.7f));
+        valueAnimator = ValueAnimator.ofInt((int)(Math.abs(getOutlineProvider().getRadius()) * 2.7f));
         int mDuration = 2000;
-        animator.setDuration(mDuration);
+        valueAnimator.setDuration(mDuration);
 
-        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+        valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             public void onAnimationUpdate(ValueAnimator animation) {
                 if(mOutlineProvider.radius > getDiagonal()/2) {
-                    animator.cancel();
+                    valueAnimator.cancel();
                 }
                 reveal((int)animation.getAnimatedValue(), WatchFragment.this.getView().getWidth()/2, WatchFragment.this.getView().getHeight()/2);
             }
         });
-        animator.start();
+        valueAnimator.start();
     }
 
     /**
      * Animates the full reveal of the view.
      */
     public void revealHide() {
-        if(mListener != null) {
-            mListener.onWatchSectionHiding();
-        }
-
-        ValueAnimator animator = ValueAnimator.ofInt(400);
+        valueAnimator = ValueAnimator.ofInt(400);
         int mDuration = 2000;
-        animator.setDuration(mDuration);
+        valueAnimator.setDuration(mDuration);
 
-        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+        valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             public void onAnimationUpdate(ValueAnimator animation) {
                 if(mOutlineProvider.radius < 0) {
-                    animator.cancel();
+                    valueAnimator.cancel();
                 }
                 reveal(-(int)animation.getAnimatedValue(), WatchFragment.this.getView().getWidth()/2, WatchFragment.this.getView().getHeight()/2);
             }
         });
-        animator.start();
+        valueAnimator.start();
     }
 
     /**
@@ -174,13 +141,20 @@ public class WatchFragment extends Fragment {
      */
     public void reveal(int rad, int posX, int posY) {
         if(!this.isVisible()) this.getView().setVisibility(View.VISIBLE);
+        if(mListener != null) {
+            if(rad > 0) {
+                mListener.onWatchSectionRevealing();
+            } else if(rad < 0) {
+                mListener.onWatchSectionHiding();
+            }
+        }
 
         if(rad > 0 && mOutlineProvider.radius >= getDiagonal()/2 && getView().getClipToOutline()) {
             //reached full reveal
             if(!isRevealed) {
                 doMediumVibration();
-                onReveal();
             }
+            onReveal();
             vibrateIn = false;
         } else if(rad < 0 && mOutlineProvider.radius <= 0) {
             //reached full hide
@@ -215,11 +189,20 @@ public class WatchFragment extends Fragment {
      * Called once the hide animation finishes.
      */
     public void onHide() {
+        Log.i(TAG, "Watch view hidden!");
         this.getView().setVisibility(View.GONE);
         this.getView().setClipToOutline(true);
         mOutlineProvider.resetRadius();
         isRevealed = false;
         getView().setOnKeyListener(null);
+        getView().setOnTouchListener(null);
+
+        if(valueAnimator != null) {
+            if(valueAnimator.isRunning()) {
+                valueAnimator.cancel();
+            }
+            valueAnimator = null;
+        }
 
         //call callback
         if(mListener != null) {
@@ -231,9 +214,17 @@ public class WatchFragment extends Fragment {
      * Called once the reveal animation finishes.
      */
     public void onReveal() {
+        Log.i(TAG, "Watch view revealed!");
         this.getView().setVisibility(View.VISIBLE);
         this.getView().setClipToOutline(false);
         isRevealed = true;
+
+        if(valueAnimator != null) {
+            if(valueAnimator.isRunning()) {
+                valueAnimator.cancel();
+            }
+            valueAnimator = null;
+        }
 
         //set back button
         getView().setFocusableInTouchMode(true);
@@ -303,6 +294,33 @@ public class WatchFragment extends Fragment {
     public double getDiagonal() {
         if(getView().getHeight() == 0) return 1;
         return Math.sqrt(Math.pow(getView().getHeight(),2) + Math.pow(getView().getWidth(),2));
+    }
+
+    public RevealOutlineProvider getOutlineProvider() {
+        return mOutlineProvider;
+    }
+    public ValueAnimator getValueAnimator() { return valueAnimator; }
+
+    /**
+     * This interface must be implemented by activities that contain this
+     * fragment to allow an interaction in this fragment to be communicated
+     * to the activity and potentially other fragments contained in that
+     * activity.
+     * <p>
+     * See the Android Training lesson <a href=
+     * "http://developer.android.com/training/basics/fragments/communicating.html"
+     * >Communicating with Other Fragments</a> for more information.
+     */
+    public interface OnFragmentInteractionListener {
+        void onWatchSectionRevealed();
+        void onWatchSectionRevealing();
+        void onWatchSectionHidden();
+        void onWatchSectionHiding();
+
+        //Swiping callbacks.
+        void onDownSwipeStart();
+        void onDownSwipeProgress(int distanceX, int distanceY, int posX, int posY);
+        void onDownSwipeStop();
     }
 
     /**

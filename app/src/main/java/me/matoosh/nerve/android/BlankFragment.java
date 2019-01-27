@@ -64,7 +64,9 @@ public class BlankFragment extends Fragment {
                     isSwipingDown = false;
                 }
             } else {
-                gestureDetector.onTouchEvent(motionEvent);
+                if(motionEvent.getPointerCount() == 1) {
+                    gestureDetector.onTouchEvent(motionEvent);
+                }
             }
 
             return false;

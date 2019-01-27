@@ -79,7 +79,10 @@ public class Nerve extends AppCompatActivity implements CameraFragment.OnFragmen
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-
+                //Hiding the watch fragment.
+                if(watchFragment.getView().getVisibility() != View.GONE) {
+                    watchFragment.onHide();
+                }
             }
 
             @Override
@@ -186,7 +189,7 @@ public class Nerve extends AppCompatActivity implements CameraFragment.OnFragmen
      */
     @Override
     public void onDownSwipeProgress(int distanceX, int distanceY, int posX, int posY) {
-        if(watchFragment != null) {
+        if(watchFragment != null && (watchFragment.getValueAnimator() == null || (watchFragment.getValueAnimator() != null && !watchFragment.getValueAnimator().isRunning()))) {
             watchFragment.reveal(-distanceY, posX, posY);
         }
     }
@@ -233,14 +236,16 @@ public class Nerve extends AppCompatActivity implements CameraFragment.OnFragmen
      */
     @Override
     public void onWatchSectionHidden() {
-
+        mViewPager.setFocusableInTouchMode(true);
+        mViewPager.requestFocus();
     }
 
     @Override
     public void onWatchSectionHiding() {
-        //Making this section visible.
-        mViewPager.setVisibility(View.VISIBLE);
-        hideSystemUI();
+        if(mViewPager.getVisibility() == View.GONE) {
+            mViewPager.setVisibility(View.VISIBLE);
+            hideSystemUI();
+        }
     }
 
     @Override

@@ -37,8 +37,6 @@ public class CameraFragment extends Fragment {
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
-    private boolean isSwipingDown = false;
-    private GestureDetector gestureDetector;
 
     /**
      * The camera preview.
