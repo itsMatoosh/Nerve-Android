@@ -51,6 +51,7 @@ dependencies {
     // optional - Test helpers for LiveData
     implementation 'androidx.recyclerview:recyclerview:1.0.0-alpha1'
     implementation 'androidx.coordinatorlayout:coordinatorlayout:1.0.0-alpha1'
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.0.0-beta01'
     testImplementation "androidx.arch.core:core-testing:$lifecycle_version"
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     testImplementation 'junit:junit:4.12'

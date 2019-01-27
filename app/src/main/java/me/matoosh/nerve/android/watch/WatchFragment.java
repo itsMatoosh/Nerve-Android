@@ -1,13 +1,13 @@
-package me.matoosh.nerve.android;
+package me.matoosh.nerve.android.watch;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Outline;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import me.matoosh.nerve.android.R;
 
 import android.os.VibrationEffect;
 import android.os.Vibrator;
@@ -21,12 +21,12 @@ import android.view.ViewOutlineProvider;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link ChannelsFragment.OnFragmentInteractionListener} interface
+ * {@link WatchFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link ChannelsFragment#newInstance} factory method to
+ * Use the {@link WatchFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ChannelsFragment extends Fragment {
+public class WatchFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -40,9 +40,8 @@ public class ChannelsFragment extends Fragment {
 
     private RevealOutlineProvider mOutlineProvider;
     private boolean vibrateIn = false;
-    private int ticks = 0;
 
-    public ChannelsFragment() {
+    public WatchFragment() {
         // Required empty public constructor
     }
 
@@ -52,11 +51,11 @@ public class ChannelsFragment extends Fragment {
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment ChannelsFragment.
+     * @return A new instance of fragment WatchFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static ChannelsFragment newInstance(String param1, String param2) {
-        ChannelsFragment fragment = new ChannelsFragment();
+    public static WatchFragment newInstance(String param1, String param2) {
+        WatchFragment fragment = new WatchFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -77,7 +76,7 @@ public class ChannelsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View v =  inflater.inflate(R.layout.fragment_channels, container, false);
+        View v =  inflater.inflate(R.layout.fragment_watch, container, false);
         mOutlineProvider = new RevealOutlineProvider();
         v.setOutlineProvider(mOutlineProvider);
         return v;
@@ -155,7 +154,7 @@ public class ChannelsFragment extends Fragment {
                 if(mOutlineProvider.radius > getDiagonal()/2) {
                     animator.cancel();
                 }
-                reveal((int)animation.getAnimatedValue(), ChannelsFragment.this.getView().getWidth()/2, ChannelsFragment.this.getView().getHeight()/2);
+                reveal((int)animation.getAnimatedValue(), WatchFragment.this.getView().getWidth()/2, WatchFragment.this.getView().getHeight()/2);
             }
         });
         animator.start();
@@ -179,7 +178,7 @@ public class ChannelsFragment extends Fragment {
                 if(mOutlineProvider.radius < 0) {
                     animator.cancel();
                 }
-                reveal(-(int)animation.getAnimatedValue(), ChannelsFragment.this.getView().getWidth()/2, ChannelsFragment.this.getView().getHeight()/2);
+                reveal(-(int)animation.getAnimatedValue(), WatchFragment.this.getView().getWidth()/2, WatchFragment.this.getView().getHeight()/2);
             }
         });
         animator.start();

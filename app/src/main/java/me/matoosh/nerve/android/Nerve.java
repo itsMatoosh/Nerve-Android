@@ -1,9 +1,6 @@
 package me.matoosh.nerve.android;
 
-import android.animation.ValueAnimator;
 import android.content.Context;
-import android.graphics.Camera;
-import android.graphics.Outline;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -16,6 +13,7 @@ import androidx.viewpager.widget.ViewPager;
 import androidx.appcompat.app.AppCompatActivity;
 import me.everything.android.ui.overscroll.OverScrollDecoratorHelper;
 import me.matoosh.nerve.android.dummy.DummyContent;
+import me.matoosh.nerve.android.watch.WatchFragment;
 
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -23,7 +21,6 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewOutlineProvider;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
@@ -31,7 +28,7 @@ import android.widget.TextView;
 /**
  * The main activity, facilitates most of the user interaction.
  */
-public class Nerve extends AppCompatActivity implements CameraFragment.OnFragmentInteractionListener, NodesFragment.OnListFragmentInteractionListener, DashboardFragment.OnFragmentInteractionListener, ChannelsFragment.OnFragmentInteractionListener, BlankFragment.OnFragmentInteractionListener {
+public class Nerve extends AppCompatActivity implements CameraFragment.OnFragmentInteractionListener, NodesFragment.OnListFragmentInteractionListener, DashboardFragment.OnFragmentInteractionListener, WatchFragment.OnFragmentInteractionListener, BlankFragment.OnFragmentInteractionListener {
 
     /**
      * The {@link PagerAdapter} that will provide
@@ -51,7 +48,7 @@ public class Nerve extends AppCompatActivity implements CameraFragment.OnFragmen
     /**
      * The channels fragment.
      */
-    private ChannelsFragment channelsFragment;
+    private WatchFragment watchFragment;
     /**
      * The camera fragment.
      */
@@ -107,7 +104,7 @@ public class Nerve extends AppCompatActivity implements CameraFragment.OnFragmen
         this.findViewById(R.id.channels_fragment).setVisibility(View.GONE);
         mViewPager.setVisibility(View.VISIBLE);
         mViewPager.setCurrentItem(CAMERA_PAGE, false);
-        channelsFragment = ((ChannelsFragment)getSupportFragmentManager().findFragmentById(R.id.channels_fragment));
+        watchFragment = ((WatchFragment)getSupportFragmentManager().findFragmentById(R.id.channels_fragment));
         cameraFragment = ((CameraFragment)getSupportFragmentManager().findFragmentById(R.id.camera_fragment));
 
         super.onResume();
@@ -191,8 +188,8 @@ public class Nerve extends AppCompatActivity implements CameraFragment.OnFragmen
      */
     @Override
     public void onDownSwipeProgress(int distanceX, int distanceY, int posX, int posY) {
-        if(channelsFragment != null) {
-            channelsFragment.reveal(-distanceY, posX, posY);
+        if(watchFragment != null) {
+            watchFragment.reveal(-distanceY, posX, posY);
         }
     }
 
@@ -202,11 +199,11 @@ public class Nerve extends AppCompatActivity implements CameraFragment.OnFragmen
     @Override
     public void onDownSwipeStop() {
         System.out.println("STOP");
-        if(channelsFragment != null) {
-            if(channelsFragment.shouldRevealSnap()) {
-                channelsFragment.revealFull();
+        if(watchFragment != null) {
+            if(watchFragment.shouldRevealSnap()) {
+                watchFragment.revealFull();
             } else {
-                channelsFragment.revealHide();
+                watchFragment.revealHide();
             }
         }
     }

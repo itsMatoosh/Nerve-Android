@@ -25,7 +25,7 @@
 
     <fragment
         android:id="@+id/channels_fragment"
-        android:name="me.matoosh.nerve.android.ChannelsFragment"
+        android:name="me.matoosh.nerve.android.watch.WatchFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
