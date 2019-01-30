@@ -17,13 +17,10 @@
     <string name="status_undernet_setup">Setting up UnderNet...</string>
     <string name="status_undernet_connecting">Connecting to UnderNet...</string>
     <string name="tab_live_map">Live Map</string>
-    <string name="tab_trending">Trending</string>
+    <string name="watch_trending">Trending</string>
     <string name="tab_friends">Friends</string>
     <string name="hint_account_button">Manage account</string>
-    <string name="title_activity_overview">Overview</string>
-    <string name="action_settings">Settings</string>
-    <string name="section_format">Hello World from section: %1$d</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="watch_connected_to">Connected to</string>
+    <string name="watch_online"><b>ONLINE</b></string>
 </resources>

@@ -13,7 +13,9 @@
     <string name="status_undernet_setup">Instalacja UnderNetu...</string>
     <string name="status_undernet_connecting">Łączenie z UnderNetem...</string>
     <string name="tab_live_map">Na Żywo</string>
-    <string name="tab_trending">Gorące</string>
+    <string name="watch_trending">Gorące</string>
     <string name="tab_friends">Znajomi</string>
     <string name="hint_account_button">Zarządzaj kontem</string>
+    <string name="watch_connected_to">Połączono z</string>
+    <string name="watch_online" translatable="false"><b>NA ŻYWO</b></string>
 </resources>

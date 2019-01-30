@@ -1,15 +1,12 @@
 package me.matoosh.nerve.android.watch;
 
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Outline;
 import android.os.Build;
 import android.os.Bundle;
-
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import me.matoosh.nerve.android.R;
-
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.Log;
@@ -20,6 +17,15 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.TextView;
+
+import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProviders;
+import me.everything.android.ui.overscroll.OverScrollDecoratorHelper;
+import me.matoosh.nerve.android.R;
 
 
 /**
@@ -35,7 +41,6 @@ public class WatchFragment extends Fragment {
     private RevealOutlineProvider mOutlineProvider;
     private boolean vibrateIn = false;
     private boolean isSwipingDown = false;
-    public boolean isRevealed = false;
     private GestureDetector gestureDetector;
     private ValueAnimator valueAnimator;
 
@@ -48,6 +53,13 @@ public class WatchFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         gestureDetector = new GestureDetector(getContext(), new GestureHandler());
+
+        getViewModel().getUserAddress(getContext()).observe(this, address -> {
+            //Update the location label.
+            TextView textView = WatchFragment.this.getActivity().findViewById(R.id.watch_city_name);
+            textView.setText(address.getLocality() + ", " + address.getCountryCode());
+        });
+
         super.onCreate(savedInstanceState);
     }
 
@@ -58,12 +70,29 @@ public class WatchFragment extends Fragment {
         View v =  inflater.inflate(R.layout.fragment_watch, container, false);
         mOutlineProvider = new RevealOutlineProvider();
         v.setOutlineProvider(mOutlineProvider);
+
+        TextView iv = v.findViewById(R.id.watch_city_name);
+
+        ObjectAnimator scaleDown = ObjectAnimator.ofPropertyValuesHolder(
+                iv,
+                PropertyValuesHolder.ofFloat("scaleX", 1.11f),
+                PropertyValuesHolder.ofFloat("scaleY", 1.11f));
+        scaleDown.setDuration(1300);
+
+        scaleDown.setRepeatCount(ObjectAnimator.INFINITE);
+        scaleDown.setRepeatMode(ObjectAnimator.REVERSE);
+        scaleDown.setInterpolator(new AccelerateDecelerateInterpolator());
+
+        scaleDown.start();
+
         return v;
     }
 
     @Override
     public void onResume() {
-        onHide();
+        //Restore reveal
+        restoreReveal();
+
         super.onResume();
     }
 
@@ -85,13 +114,25 @@ public class WatchFragment extends Fragment {
     }
 
     /**
+     * Restores the revealed state of the view panel.
+     */
+    public void restoreReveal() {
+        WatchViewModel model = ViewModelProviders.of(this).get(WatchViewModel.class);
+        if(model.isWatchModuleVisible().getValue()) {
+            onReveal();
+        } else {
+            onHide();
+        }
+    }
+
+    /**
      * Checks whether the reveal animation should snap to full view.
      * @return
      */
     public boolean shouldRevealSnap() {
         if(this.getView().getHeight() == 0) return false;
 
-        if(!isRevealed)
+        if(!getViewModel().isWatchModuleVisible().getValue())
             return 2*this.mOutlineProvider.getRadius() / getDiagonal() > 0.25f;
         else
             return 2*this.mOutlineProvider.getRadius() / getDiagonal() < 0.7f;
@@ -105,13 +146,11 @@ public class WatchFragment extends Fragment {
         int mDuration = 2000;
         valueAnimator.setDuration(mDuration);
 
-        valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            public void onAnimationUpdate(ValueAnimator animation) {
-                if(mOutlineProvider.radius > getDiagonal()/2) {
-                    valueAnimator.cancel();
-                }
-                reveal((int)animation.getAnimatedValue(), WatchFragment.this.getView().getWidth()/2, WatchFragment.this.getView().getHeight()/2);
+        valueAnimator.addUpdateListener(animation -> {
+            if(mOutlineProvider.radius > getDiagonal()/2 && valueAnimator != null) {
+                valueAnimator.cancel();
             }
+            reveal((int)animation.getAnimatedValue(), WatchFragment.this.getView().getWidth()/2, WatchFragment.this.getView().getHeight()/2);
         });
         valueAnimator.start();
     }
@@ -124,13 +163,12 @@ public class WatchFragment extends Fragment {
         int mDuration = 2000;
         valueAnimator.setDuration(mDuration);
 
-        valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            public void onAnimationUpdate(ValueAnimator animation) {
-                if(mOutlineProvider.radius < 0) {
-                    valueAnimator.cancel();
-                }
-                reveal(-(int)animation.getAnimatedValue(), WatchFragment.this.getView().getWidth()/2, WatchFragment.this.getView().getHeight()/2);
+        valueAnimator.addUpdateListener(animation -> {
+            if(mOutlineProvider.radius < 0 && valueAnimator != null) {
+                valueAnimator.cancel();
+
             }
+            reveal(-(int)animation.getAnimatedValue(), WatchFragment.this.getView().getWidth()/2, WatchFragment.this.getView().getHeight()/2);
         });
         valueAnimator.start();
     }
@@ -151,14 +189,14 @@ public class WatchFragment extends Fragment {
 
         if(rad > 0 && mOutlineProvider.radius >= getDiagonal()/2 && getView().getClipToOutline()) {
             //reached full reveal
-            if(!isRevealed) {
+            if(!getViewModel().isWatchModuleVisible().getValue()) {
                 doMediumVibration();
             }
             onReveal();
             vibrateIn = false;
         } else if(rad < 0 && mOutlineProvider.radius <= 0) {
             //reached full hide
-            if(isRevealed) {
+            if(getViewModel().isWatchModuleVisible().getValue()) {
                 doMediumVibration();
             }
             onHide();
@@ -193,7 +231,7 @@ public class WatchFragment extends Fragment {
         this.getView().setVisibility(View.GONE);
         this.getView().setClipToOutline(true);
         mOutlineProvider.resetRadius();
-        isRevealed = false;
+        getViewModel().isWatchModuleVisible().setValue(false);
         getView().setOnKeyListener(null);
         getView().setOnTouchListener(null);
 
@@ -217,7 +255,7 @@ public class WatchFragment extends Fragment {
         Log.i(TAG, "Watch view revealed!");
         this.getView().setVisibility(View.VISIBLE);
         this.getView().setClipToOutline(false);
-        isRevealed = true;
+        getViewModel().isWatchModuleVisible().setValue(true);
 
         if(valueAnimator != null) {
             if(valueAnimator.isRunning()) {
@@ -237,7 +275,8 @@ public class WatchFragment extends Fragment {
             }
             return false;
         });
-        getView().setOnTouchListener((view, motionEvent) -> {
+        getView().findViewById(R.id.watch_appbar_content).setOnTouchListener((view, motionEvent) -> {
+            System.out.println("SSSS");
             if(motionEvent.getAction() == MotionEvent.ACTION_UP) {
                 if(isSwipingDown) {
                     mListener.onDownSwipeStop();
@@ -285,6 +324,14 @@ public class WatchFragment extends Fragment {
         } else {
             v.vibrate(40);
         }
+    }
+
+    /**
+     * Gets the viewmodel of the fragment.
+     * @return
+     */
+    public WatchViewModel getViewModel() {
+        return ViewModelProviders.of(this).get(WatchViewModel.class);
     }
 
     /**
